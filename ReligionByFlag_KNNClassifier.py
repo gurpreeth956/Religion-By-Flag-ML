@@ -15,9 +15,10 @@ data = pd.read_csv('flags_data.csv', delimiter=',')
 # Pick the important attributes
 x = data.iloc[:, [1, 5]].values
 y = data.iloc[:, 29].values
+countries = data.iloc[:, 0].values
 
 # Split into testing and training set
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.3)
+x_train, x_test, y_train, y_test, countries_train, countries_test = train_test_split(x, y, countries, test_size=.3)
 
 # Normalize data before making predictions
 # normalize_scale = StandardScaler()
@@ -39,7 +40,7 @@ z = kNN_class.predict(np.c_[x_grid.ravel(), y_grid.ravel()])
 z_grid = z.reshape(x_grid.shape)
 
 # Plot the results of the training set
-plt.figure()
+plt.figure(1)
 light_Colors = ListedColormap(['#F39D9D', '#93F088', '#67AAF1'])
 dark_Colors = ListedColormap(['#F32C2C', '#219912', '#0E67C5'])
 plt.pcolormesh(x_grid, y_grid, z_grid, cmap=light_Colors)
@@ -54,8 +55,8 @@ green_patch = patches.Patch(color='green', label='Islam')
 blue_patch = patches.Patch(color='blue', label='Other')
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[red_patch, green_patch, blue_patch])
 plt.tight_layout()
-plt.show()
 
+# Get prediction results and report
 y_prediction = kNN_class.predict(x_test)
 print(classification_report(y_test, y_prediction))
 
@@ -64,13 +65,24 @@ errors = []
 for i in range(1, 25):
     knn = KNeighborsClassifier(n_neighbors=i, weights='distance')
     knn.fit(x_train, y_train)
-    y_prediction = knn.predict(x_test)
-    errors.append(np.mean(y_prediction != y_test))
+    y_prediction_i = knn.predict(x_test)
+    errors.append(np.mean(y_prediction_i != y_test))
 
-# Plot KNN Classifier error
-plt.figure()
+# Plot KNN Classifier error based on K
+plt.figure(2)
 plt.plot(range(1, 25), errors, color='red', marker='o', markersize=8)
 plt.title('K-Value Error Rate')
 plt.xlabel('K-Value')
 plt.ylabel('Error')
+plt.tight_layout()
 plt.show()
+
+# Print test results with predictions
+np_countries_test = np.array(countries_test)
+np_y_test = np.array(y_test)
+np_y_prediction = np.array(y_prediction)
+results_array = np.column_stack((np_countries_test, np_y_test))
+results_array = np.column_stack((results_array, np_y_prediction))
+print('Below is the test set [country, actual religion, predicted religion '
+      '(1 for Christian, 2 for Islam, 3 for Other: ')
+print(results_array)
