@@ -1,29 +1,55 @@
+# Import necessary libraries
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn import tree
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
+# Import data from csv file
 data = pd.read_csv("flags_data.csv")
 
-# Drop more data later, tree is too large
-#'landmass''language','crescent','crosses', 'sunstars'
-x = data.drop(['mainhue', 'green', 'religion', 'topleft', 'botright', 'name','zone','area','population','bars','stripes','colors','red','blue','gold','white','black','orange','circles','saltires','quarters','triangle','icon','animate','text'], axis=1)
-y = data['religion']
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.30)
+# Pick the important attributes
+x = data[['landmass', 'language', 'crescent', 'crosses', 'sunstars']].values
+y = data['religion'].values
+countries = data['name'].values
+
+# Split into testing and training set
+x_train, x_test, y_train, y_test, countries_train, countries_test = train_test_split(x, y, countries, test_size=.3)
+
+# Create decision tree classifier
 classifier = tree.DecisionTreeClassifier()
 classifier.fit(x_train, y_train)
-y_pred = classifier.predict(x_test)
-feature_arr = ['landmass', 'language', 'crosses', 'sunstars', 'crescent']
-class_arr = ['Christian', 'Muslim', 'Other']
+y_prediction = classifier.predict(x_test)
+features_arr = ['landmass', 'language', 'crosses', 'sunstars', 'crescent']
+classes_arr = ['Christian', 'Muslim', 'Other']
 
-accuracy = accuracy_score(y_test, y_pred)
-print('Accuracy: ', accuracy)
-fig, ax = plt.subplots(figsize=(10, 10))
+# Compute accuracy of the decision tree
+accuracy = accuracy_score(y_test, y_prediction)
+print('Accuracy of decision tree: ', accuracy, '\n')
+fig, ax = plt.subplots(figsize=(30, 30))
 
-# Tree is too large to display properly, change max depth, fontsize and DPI to adjust info/size
-tree.plot_tree(classifier, feature_names=feature_arr, class_names=class_arr, ax=ax, filled=True, fontsize=5, max_depth=4) #max_depth=4
-# Save tree as png if you want to zoom in
-plt.savefig('flag_tree', dpi=100)
+# Get accuracy of total prediction
+y_total = len(y_test)
+y_correct = 0
+for i in range(0, y_total):
+    if y_test[i] == y_prediction[i]:
+        y_correct += 1
+
+# Print test results with predictions
+np_countries_test = np.array(countries_test)
+np_y_test = np.array(y_test)
+np_y_prediction = np.array(y_prediction)
+results_array = np.column_stack((np_countries_test, np_y_test))
+results_array = np.column_stack((results_array, np_y_prediction))
+print('Below is the test set of the country, actual religion, predicted religion '
+      '(1 for Christian, 2 for Islam, 3 for Other): ')
+print(results_array, '\n')
+print('The Decision Tree predicted', y_correct, 'out of', y_total, 'correctly, meaning the accuracy is:', accuracy)
+
+# Plot decision tree graph (too large to display)
+tree.plot_tree(classifier, feature_names=features_arr, class_names=classes_arr, filled=True, fontsize=8, ax=ax)
+
+# Save tree as png to view decision tree (zoom in)
+plt.savefig('religion_decision_tree', dpi=100)
 plt.tight_layout()
-plt.show()
