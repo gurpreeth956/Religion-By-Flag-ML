@@ -4,18 +4,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.colors import ListedColormap
+from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
 
 
 # Import data from csv file
-data = pd.read_csv('flags_data.csv', delimiter=',')
+data = pd.read_csv('flags_data.csv')
 
 # Pick the important attributes
-x = data.iloc[:, [1, 5]].values
-y = data.iloc[:, 29].values
-countries = data.iloc[:, 0].values
+x = data[['landmass', 'language']].values
+y = data['religion'].values
+countries = data['name'].values
 
 # Split into testing and training set
 x_train, x_test, y_train, y_test, countries_train, countries_test = train_test_split(x, y, countries, test_size=.3)
@@ -34,9 +35,9 @@ y_max = x_train[:, 1].max() + 1
 x_grid, y_grid = np.meshgrid(np.arange(x_min, x_max, .01), np.arange(y_min, y_max, .01))
 
 # Use KNN classifier to predict religion
-kNN_class = KNeighborsClassifier(n_neighbors=5, weights='distance')
-kNN_class.fit(x_train, y_train)
-z = kNN_class.predict(np.c_[x_grid.ravel(), y_grid.ravel()])
+knn_class = KNeighborsClassifier(n_neighbors=5, weights='distance')
+knn_class.fit(x_train, y_train)
+z = knn_class.predict(np.c_[x_grid.ravel(), y_grid.ravel()])
 z_grid = z.reshape(x_grid.shape)
 
 # Plot the results of the training set
@@ -57,25 +58,16 @@ plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), handles=[red_patch, green
 plt.tight_layout()
 
 # Get prediction results and report
-y_prediction = kNN_class.predict(x_test)
+y_prediction = knn_class.predict(x_test)
 print(classification_report(y_test, y_prediction))
 
-# Calculate error for KNN from 1 to 25
-errors = []
-for i in range(1, 25):
-    knn = KNeighborsClassifier(n_neighbors=i, weights='distance')
-    knn.fit(x_train, y_train)
-    y_prediction_i = knn.predict(x_test)
-    errors.append(np.mean(y_prediction_i != y_test))
-
-# Plot KNN Classifier error based on K
-plt.figure(2)
-plt.plot(range(1, 25), errors, color='red', marker='o', markersize=8)
-plt.title('K-Value Error Rate')
-plt.xlabel('K-Value')
-plt.ylabel('Error')
-plt.tight_layout()
-plt.show()
+# Get accuracy of total prediction
+y_total = len(y_test)
+y_correct = 0
+for i in range(0, y_total):
+    if y_test[i] == y_prediction[i]:
+        y_correct += 1
+y_accuracy = y_correct/y_total
 
 # Print test results with predictions
 np_countries_test = np.array(countries_test)
@@ -85,4 +77,32 @@ results_array = np.column_stack((np_countries_test, np_y_test))
 results_array = np.column_stack((results_array, np_y_prediction))
 print('Below is the test set [country, actual religion, predicted religion '
       '(1 for Christian, 2 for Islam, 3 for Other: ')
-print(results_array)
+print(results_array, '\n')
+print('The KNN Classifier predicted', y_correct, 'out of', y_total, 'correctly, meaning the accuracy is:', y_accuracy)
+print('')
+
+# Calculate error for KNN from 1 to 25
+errors = []
+for i in range(1, 25):
+    knn_class_i = KNeighborsClassifier(n_neighbors=i, weights='distance')
+    knn_class_i.fit(x_train, y_train)
+    y_prediction_i = knn_class_i.predict(x_test)
+    errors.append(np.mean(y_prediction_i != y_test))
+
+# Plot KNN Classifier error based on K
+plt.figure(2)
+plt.plot(range(1, 25), errors, color='red', marker='o', markersize=8)
+plt.title('K-Value Error Rate')
+plt.xlabel('K-Value')
+plt.ylabel('Error')
+plt.tight_layout()
+
+# Do a 5-fold cross validation
+knn_cross_valid = KNeighborsClassifier(n_neighbors=5)
+cross_val_score = cross_val_score(knn_cross_valid, x, y, cv=5)
+cross_val_mean = np.mean(cross_val_score)
+print('5-fold Cross Validation Accuracy:', cross_val_score)
+print('Cross Validation Mean:{}', cross_val_mean)
+
+# Show plots after everything
+plt.show()
