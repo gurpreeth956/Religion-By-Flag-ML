@@ -49,7 +49,8 @@ print(results_array, '\n')
 print('The Decision Tree predicted', y_correct, 'out of', y_total, 'correctly, meaning the accuracy is:', accuracy)
 
 # Plot decision tree graph (too large to display)
-tree.plot_tree(classifier.estimators_[0], feature_names=features_arr, class_names=classes_arr, filled=True, fontsize=8, ax=ax)
+tree.plot_tree(classifier.estimators_[0], feature_names=features_arr, class_names=classes_arr, filled=True,
+               fontsize=8, ax=ax)
 
 # Save tree as png to view decision tree (zoom in)
 plt.savefig('religion_decision_tree', dpi=100)

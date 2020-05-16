@@ -4,10 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.colors import ListedColormap
+from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report
+# from sklearn.preprocessing import StandardScaler
 
 
 # Import data from csv file
@@ -21,7 +22,7 @@ countries = data['name'].values
 # Split into testing and training set
 x_train, x_test, y_train, y_test, countries_train, countries_test = train_test_split(x, y, countries, test_size=.3)
 
-# Normalize data before making predictions
+# Normalize data if you need to
 # normalize_scale = StandardScaler()
 # normalize_scale.fit(x_train)
 # x_train = normalize_scale.transform(x_train)
@@ -48,7 +49,7 @@ plt.pcolormesh(x_grid, y_grid, z_grid, cmap=light_Colors)
 plt.scatter(x_train[:, 0], x_train[:, 1], cmap=dark_Colors, c=y_train)
 plt.xlim(x_grid.min(), x_grid.max())
 plt.ylim(y_grid.min(), y_grid.max())
-plt.title('Religion 5-NN Classifier')
+plt.title('Religion 5-NN Classifier (Landmass and Language)')
 plt.xlabel('landmass')
 plt.ylabel('language')
 red_patch = patches.Patch(color='red', label='Christian')
