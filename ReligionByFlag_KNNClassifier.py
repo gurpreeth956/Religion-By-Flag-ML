@@ -35,7 +35,7 @@ y_max = x_train[:, 1].max() + 1
 x_grid, y_grid = np.meshgrid(np.arange(x_min, x_max, .01), np.arange(y_min, y_max, .01))
 
 # Use KNN classifier to predict religion
-knn_class = KNeighborsClassifier(n_neighbors=10, weights='distance')
+knn_class = KNeighborsClassifier(n_neighbors=5, weights='distance')
 knn_class.fit(x_train, y_train)
 
 # Plot the results of the training set
