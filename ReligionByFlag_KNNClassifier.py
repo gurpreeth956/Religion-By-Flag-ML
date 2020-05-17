@@ -4,10 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.colors import ListedColormap
+from sklearn.metrics import classification_report
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report
+# from sklearn.preprocessing import StandardScaler
 
 
 # Import data from csv file
@@ -21,9 +22,8 @@ countries = data['name'].values
 # Split into testing and training set
 x_train, x_test, y_train, y_test, countries_train, countries_test = train_test_split(x, y, countries, test_size=.3)
 
-# Normalize data before making predictions
-# normalize_scale = StandardScaler()
-# normalize_scale.fit(x_train)
+# Normalize data if you need to
+# normalize_scale = StandardScaler().fit(x_train)
 # x_train = normalize_scale.transform(x_train)
 # x_test = normalize_scale.transform(x_test)
 
@@ -37,18 +37,18 @@ x_grid, y_grid = np.meshgrid(np.arange(x_min, x_max, .01), np.arange(y_min, y_ma
 # Use KNN classifier to predict religion
 knn_class = KNeighborsClassifier(n_neighbors=5, weights='distance')
 knn_class.fit(x_train, y_train)
-z = knn_class.predict(np.c_[x_grid.ravel(), y_grid.ravel()])
-z_grid = z.reshape(x_grid.shape)
 
 # Plot the results of the training set
 plt.figure(1)
 light_Colors = ListedColormap(['#F39D9D', '#93F088', '#67AAF1'])
 dark_Colors = ListedColormap(['#F32C2C', '#219912', '#0E67C5'])
+z = knn_class.predict(np.c_[x_grid.ravel(), y_grid.ravel()])
+z_grid = z.reshape(x_grid.shape)
 plt.pcolormesh(x_grid, y_grid, z_grid, cmap=light_Colors)
 plt.scatter(x_train[:, 0], x_train[:, 1], cmap=dark_Colors, c=y_train)
 plt.xlim(x_grid.min(), x_grid.max())
 plt.ylim(y_grid.min(), y_grid.max())
-plt.title('Religion 5-NN Classifier')
+plt.title('Religion 5-NN Classifier (Landmass and Language)')
 plt.xlabel('landmass')
 plt.ylabel('language')
 red_patch = patches.Patch(color='red', label='Christian')
@@ -98,7 +98,7 @@ plt.ylabel('Error')
 plt.tight_layout()
 
 # Do a 5-fold cross validation
-knn_cross_valid = KNeighborsClassifier(n_neighbors=5)
+knn_cross_valid = KNeighborsClassifier(n_neighbors=5, weights='distance')
 cross_val_score = cross_val_score(knn_cross_valid, x, y, cv=5)
 cross_val_mean = np.mean(cross_val_score)
 print('5-fold Cross Validation Accuracy:', cross_val_score)

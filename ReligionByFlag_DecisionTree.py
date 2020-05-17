@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
+
 # Import data from csv file
 data = pd.read_csv("flags_data.csv")
 
@@ -48,9 +49,11 @@ print('Below is the test set of the country, actual religion, predicted religion
 print(results_array, '\n')
 print('The Decision Tree predicted', y_correct, 'out of', y_total, 'correctly, meaning the accuracy is:', accuracy)
 
-# Plot decision tree graph (too large to display)
-tree.plot_tree(classifier.estimators_[0], feature_names=features_arr, class_names=classes_arr, filled=True, fontsize=8, ax=ax)
+# Plot decision tree graph (change estimator index for which tree you want to show)
+tree.plot_tree(classifier.estimators_[0], feature_names=features_arr, class_names=classes_arr, filled=True,
+               fontsize=8, ax=ax)
 
 # Save tree as png to view decision tree (zoom in)
 plt.savefig('religion_decision_tree', dpi=100)
 plt.tight_layout()
+#plt.show()
